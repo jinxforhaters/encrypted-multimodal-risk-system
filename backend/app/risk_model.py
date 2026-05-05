@@ -1,4 +1,5 @@
 import os
+import warnings
 from typing import Dict, Any
 
 import joblib
@@ -51,8 +52,14 @@ class RiskScoringModel:
         """
         X = self.prepare_features(nlp_result, image_result)
 
-        predicted_class = int(self.model.predict(X)[0])
-        probabilities = self.model.predict_proba(X)[0]
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="X does not have valid feature names.*",
+                category=UserWarning
+            )
+            predicted_class = int(self.model.predict(X)[0])
+            probabilities = self.model.predict_proba(X)[0]
 
         # Probability of predicted class
         confidence = float(probabilities[predicted_class])

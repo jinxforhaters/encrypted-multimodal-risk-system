@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
+import certifi
 from pymongo import DESCENDING, MongoClient
 
 from app.config import settings
@@ -11,7 +12,11 @@ class MongoDBClient:
         if not settings.MONGO_URI:
             raise ValueError("MONGO_URI is missing. Please add it in backend/.env")
 
-        self.client = MongoClient(settings.MONGO_URI)
+        self.client = MongoClient(
+            settings.MONGO_URI,
+            tlsCAFile=certifi.where(),
+            serverSelectionTimeoutMS=30000
+        )
         self.db = self.client[settings.MONGO_DB_NAME]
         self.collection = self.db[settings.MONGO_COLLECTION_NAME]
 
