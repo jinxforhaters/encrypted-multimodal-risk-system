@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: encrypted-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: encrypted-dashboard
+  template:
+    metadata:
+      labels:
+        app: encrypted-dashboard
+    spec:
+      containers:
+        - name: dashboard
+          image: your-dockerhub-username/encrypted-dashboard:latest
+          ports:
+            - containerPort: 8501
+          env:
+            - name: API_BASE_URL
+              value: http://encrypted-backend-service:8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: encrypted-dashboard-service
+spec:
+  selector:
+    app: encrypted-dashboard
+  ports:
+    - protocol: TCP
+      port: 8501
+      targetPort: 8501
+  type: LoadBalancer
