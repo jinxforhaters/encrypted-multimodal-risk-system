@@ -23,6 +23,18 @@ from app.risk_model import RiskScoringModel
 from app.database import MongoDBClient
 
 
+db_client = None
+
+
+def get_db_client() -> MongoDBClient:
+    global db_client
+
+    if db_client is None:
+        db_client = MongoDBClient()
+
+    return db_client
+
+
 app = FastAPI(
     title="Encrypted Multi-Modal Intelligence System",
     description="API for encrypted text + image analysis and unified risk scoring.",
@@ -41,7 +53,6 @@ app.add_middleware(
 nlp_processor = NLPProcessor()
 image_processor = ImageProcessor()
 risk_model = RiskScoringModel()
-db_client = MongoDBClient()
 
 
 @app.get("/")
@@ -102,7 +113,7 @@ def analyze_encrypted_multimodal_data(request: AnalyzeRequest):
         )
 
         # 6. Store complete analysis result in MongoDB
-        record_id = db_client.insert_risk_record(
+        record_id = get_db_client().insert_risk_record(
             decrypted_text=decrypted_text,
             image_path=image_result.get("image_path", ""),
             nlp_result=nlp_result,
@@ -125,7 +136,7 @@ def analyze_encrypted_multimodal_data(request: AnalyzeRequest):
 @app.get("/records", response_model=RecentRecordsResponse)
 def get_recent_records(limit: int = 20):
     try:
-        records = db_client.get_recent_records(limit=limit)
+        records = get_db_client().get_recent_records(limit=limit)
         return {
             "records": records
         }

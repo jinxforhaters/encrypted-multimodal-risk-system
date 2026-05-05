@@ -2,7 +2,6 @@ import os
 from typing import Dict, Any
 
 import joblib
-import pandas as pd
 
 
 MODEL_PATH = os.path.join("models", "risk_model.pkl")
@@ -25,7 +24,7 @@ class RiskScoringModel:
         self,
         nlp_result: Dict[str, Any],
         image_result: Dict[str, Any]
-    ) -> pd.DataFrame:
+    ) -> list[list[float]]:
         """
         Convert NLP + image outputs into model input features.
         """
@@ -40,7 +39,7 @@ class RiskScoringModel:
             "bright_region_ratio": image_result.get("bright_region_ratio", 0.0)
         }
 
-        return pd.DataFrame([features], columns=self.feature_columns)
+        return [[features[column] for column in self.feature_columns]]
 
     def predict_risk(
         self,

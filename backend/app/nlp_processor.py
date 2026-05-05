@@ -2,8 +2,6 @@ import re
 from collections import Counter
 from typing import Dict, List, Any
 
-from transformers import pipeline
-
 
 RISK_KEYWORDS = [
     "risk", "danger", "dangerous", "failure", "failed", "fault", "faulty",
@@ -21,12 +19,27 @@ STOPWORDS = {
     "you", "i", "he", "she", "there", "here", "not", "but", "so"
 }
 
+POSITIVE_WORDS = {
+    "acceptable", "clear", "fixed", "good", "improved", "normal", "ok",
+    "operational", "passed", "resolved", "safe", "secure", "stable",
+    "success", "successful", "working"
+}
+
+NEGATIVE_WORDS = {
+    "abnormal", "bad", "broken", "burn", "burning", "contamination",
+    "corroded", "corrosion", "crack", "cracked", "critical", "damage",
+    "damaged", "danger", "dangerous", "defect", "defective", "error",
+    "failed", "failure", "fault", "faulty", "fire", "hazard", "leak",
+    "leakage", "noise", "overheat", "overheating", "risk", "unsafe",
+    "urgent", "vibration", "warning"
+}
+
+
 class NLPProcessor:
     def __init__(self):
-        self.sentiment_pipeline = pipeline(
-            "sentiment-analysis",
-            model="distilbert-base-uncased-finetuned-sst-2-english"
-        )
+        # Keep sentiment analysis deterministic and lightweight for 512 MB hosts.
+        self.positive_words = POSITIVE_WORDS
+        self.negative_words = NEGATIVE_WORDS
 
     def clean_text(self, text: str) -> str:
         text = text.lower()
@@ -59,14 +72,33 @@ class NLPProcessor:
         return found_keywords
 
     def analyze_sentiment(self, text: str) -> Dict[str, Any]:
-        result = self.sentiment_pipeline(text[:512])[0]
+        cleaned_text = self.clean_text(text)
+        words = cleaned_text.split()
 
-        label = result["label"].lower()
-        score = float(result["score"])
+        if not words:
+            return {
+                "sentiment": "negative",
+                "sentiment_score": 0.5
+            }
+
+        word_counts = Counter(words)
+        positive_hits = sum(word_counts[word] for word in self.positive_words)
+        negative_hits = sum(word_counts[word] for word in self.negative_words)
+        matched_hits = positive_hits + negative_hits
+
+        if matched_hits == 0:
+            label = "positive"
+            score = 0.5
+        elif negative_hits >= positive_hits:
+            label = "negative"
+            score = 0.5 + (negative_hits / matched_hits) * 0.5
+        else:
+            label = "positive"
+            score = 0.5 + (positive_hits / matched_hits) * 0.5
 
         return {
             "sentiment": label,
-            "sentiment_score": score
+            "sentiment_score": round(float(score), 4)
         }
 
     def calculate_text_risk_score(

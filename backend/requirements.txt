@@ -2,9 +2,6 @@ fastapi
 uvicorn
 python-multipart
 pydantic
-transformers
-torch
-nltk
 scikit-learn
 opencv-python-headless
 numpy
@@ -12,4 +9,3 @@ pillow
 pymongo
 python-dotenv
 joblib
-pandas

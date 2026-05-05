@@ -12,8 +12,14 @@ services:
         value: encrypted_multimodal_db
       - key: MONGO_COLLECTION_NAME
         value: risk_records
-      - key: HF_HOME
-        value: /tmp/huggingface
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: MALLOC_ARENA_MAX
+        value: "2"
+      - key: OMP_NUM_THREADS
+        value: "1"
+      - key: OPENBLAS_NUM_THREADS
+        value: "1"
 
   - type: web
     name: encrypted-multimodal-dashboard

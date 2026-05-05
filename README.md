@@ -71,12 +71,10 @@ Backend:
 - Pydantic
 
 AI/ML:
-- Transformers
 - Scikit-learn
 - Random Forest Classifier
 - OpenCV
 - NumPy
-- Pandas
 
 Database:
 - MongoDB Atlas
