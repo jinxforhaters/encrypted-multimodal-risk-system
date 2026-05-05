@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 
 
@@ -24,11 +24,13 @@ class AnalyzeRequest(BaseModel):
 
 
 class AnalyzeResponse(BaseModel):
-    record_id: str
+    record_id: Optional[str]
     decrypted_text: str
     nlp_result: Dict[str, Any]
     image_result: Dict[str, Any]
     risk_result: Dict[str, Any]
+    db_status: str = "saved"
+    db_error: Optional[str] = None
 
 
 class RecentRecordsResponse(BaseModel):

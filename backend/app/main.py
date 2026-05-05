@@ -112,21 +112,31 @@ def analyze_encrypted_multimodal_data(request: AnalyzeRequest):
             image_result=image_result
         )
 
-        # 6. Store complete analysis result in MongoDB
-        record_id = get_db_client().insert_risk_record(
-            decrypted_text=decrypted_text,
-            image_path=image_result.get("image_path", ""),
-            nlp_result=nlp_result,
-            image_result=image_result,
-            risk_result=risk_result
-        )
+        # 6. Store complete analysis result in MongoDB when available.
+        record_id = None
+        db_status = "saved"
+        db_error = None
+
+        try:
+            record_id = get_db_client().insert_risk_record(
+                decrypted_text=decrypted_text,
+                image_path=image_result.get("image_path", ""),
+                nlp_result=nlp_result,
+                image_result=image_result,
+                risk_result=risk_result
+            )
+        except Exception as e:
+            db_status = "unavailable"
+            db_error = str(e)
 
         return {
             "record_id": record_id,
             "decrypted_text": decrypted_text,
             "nlp_result": nlp_result,
             "image_result": image_result,
-            "risk_result": risk_result
+            "risk_result": risk_result,
+            "db_status": db_status,
+            "db_error": db_error
         }
 
     except Exception as e:
