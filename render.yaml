@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: encrypted-multimodal-backend
+    env: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB_NAME
+        value: encrypted_multimodal_db
+      - key: MONGO_COLLECTION_NAME
+        value: risk_records
+      - key: HF_HOME
+        value: /tmp/huggingface
+
+  - type: web
+    name: encrypted-multimodal-dashboard
+    env: docker
+    plan: free
+    rootDir: .
+    dockerfilePath: ./dashboard/Dockerfile
+    envVars:
+      - key: API_BASE_URL
+        value: https://encrypted-multimodal-backend.onrender.com
